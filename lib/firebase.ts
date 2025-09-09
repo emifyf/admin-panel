@@ -26,7 +26,7 @@ export interface FirebaseUser {
   role: UserRole
   department: string
   status: "active" | "inactive"
-  createdAt?: Date
+  created?: Date
   updatedAt?: Date
 }
 // User management functions

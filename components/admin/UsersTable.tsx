@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Search, Eye } from "lucide-react"
-import { UserRoleBadge, type UserRole } from "./UserRoleSelector"
+import { UserRoleBadge } from "./UserRoleSelector"
+import type { UserRole } from "@/lib/firebase"
 import type { ACL } from "@/lib/acl"
 
 export interface User {
@@ -57,6 +58,19 @@ export function UsersTable({ users, projects, acl }: UsersTableProps) {
     const userProjectIds = acl[userId] || []
     return projects.filter((project) => userProjectIds.includes(project.id))
   }
+
+
+
+  const formatDate = (created: any) => {
+    if (!created) return "";
+    // Firestore Timestamp
+    if (typeof created === "object" && typeof created.toDate === "function") {
+      return created.toDate().toLocaleDateString("es-AR");
+    }
+    // String o número
+    const date = new Date(created);
+    return isNaN(date.getTime()) ? "" : date.toLocaleDateString("es-AR");
+  };
 
   return (
     <>
@@ -168,11 +182,11 @@ export function UsersTable({ users, projects, acl }: UsersTableProps) {
                         <div className="font-medium text-sm">{project.name}</div>
                         <div className="text-xs text-muted-foreground mt-1">
                           {project.description && <div className="mb-1">{project.description}</div>}
-                          {project.status && <span className="mr-3">Status: {project.status}</span>}
-                          {project.owner && <span className="mr-3">Owner: {project.owner}</span>}
-                          {project.created && <span>Created: {project.created}</span>}
-                          {project.type && <span className="mr-3">Type: {project.type}</span>}
-                          {project.date && <span>Date: {project.date}</span>}
+                          {project.status && <div className="mr-3">Status: {project.status}</div>}
+                          {project.owner && <div className="mr-3">Owner: {project.owner}</div>}
+                          {project.created && <div>Created: {formatDate(project.created) }</div>}
+                          {project.type && <div className="mr-3">Type: {project.type}</div>}
+                          {project.date && <div>Date: {project.date}</div>}
                         </div>
                         {project.path && <div className="text-xs text-muted-foreground mt-1">Path: {project.path}</div>}
                       </div>

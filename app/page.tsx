@@ -15,6 +15,7 @@ import { ThemeToggle } from "@/components/admin/ThemeToggle"
 import type { UserRole } from "@/lib/firebase"
 import { getUsers, type FirebaseUser } from "@/lib/firebase"
 import { getProjects } from "@/lib/firebase"
+import {RefreshWeb} from "@/components/admin/refreshWeb"
 
 import { getACL, type ACL } from "@/lib/acl"
 
@@ -231,8 +232,8 @@ export default function AdminPanel() {
   const [acl, setACL] = useState<ACL>({})
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-   const loadData = async () => {
+
+ const loadData = async () => {
       try {
         const firebaseUsers = await getUsers()
         const firebaseProjects = await getProjects()
@@ -268,13 +269,14 @@ export default function AdminPanel() {
         setLoading(false)
       }
     }
-
-    loadData()
-  }, [])
   const handleACLChange = (newACL: ACL) => {
     setACL(newACL)
   }
+  useEffect(() => {
+  
 
+    loadData()
+  }, [])
   if (loading) {
     return (
       <div className="container mx-auto p-6">
@@ -296,10 +298,16 @@ export default function AdminPanel() {
           <p className="text-muted-foreground">Manage users, projects, and access permissions</p>
         </div>
         <div className="flex items-center gap-4">
+          <RefreshWeb onRefresh={loadData} loading={loading}/>
+
           <ThemeToggle />
           <ImportExportACL onACLChange={handleACLChange} />
         </div>
       </div>
+
+
+  
+
 
       <Tabs defaultValue="users" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">

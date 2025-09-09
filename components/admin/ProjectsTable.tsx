@@ -23,8 +23,8 @@ export function ProjectsTable({ projects, users, acl }: ProjectsTableProps) {
   const filteredProjects = projects.filter(
     (project) =>
       project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.status.toLowerCase().includes(searchTerm.toLowerCase()),
+      project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.status?.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   const getProjectViewers = (projectId: string): User[] => {
@@ -52,14 +52,31 @@ export function ProjectsTable({ projects, users, acl }: ProjectsTableProps) {
         return "outline"
     }
   }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
+  const getStatusBadgeClass = (status: string) => {
+  switch (status.toLowerCase()) {
+    case "activo":
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+    case "inactivo":
+      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+    case "completado":
+      return "bg-[#33809d] text-white"
+    case "en progreso":
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+    default:
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
   }
+}
+
+const formatDate = (created: any) => {
+  if (!created) return ""
+  // Firestore Timestamp
+  if (typeof created === "object" && typeof created.toDate === "function") {
+    return created.toDate().toLocaleDateString("es-AR")
+  }
+  // String o número
+  const date = new Date(created)
+  return isNaN(date.getTime()) ? "" : date.toLocaleDateString("es-AR")
+}
 
   return (
     <>
@@ -97,7 +114,7 @@ export function ProjectsTable({ projects, users, acl }: ProjectsTableProps) {
                   <TableRow key={project.id}>
                     <TableCell className="font-medium">{project.name}</TableCell>
                     <TableCell>
-                      <Badge variant={getStatusBadgeVariant(project.status)}>{project.status}</Badge>
+                        <Badge className={getStatusBadgeClass(project.status ?? "unknown")}>{project.status ?? "Sin estado"}</Badge>
                     </TableCell>
                     <TableCell>{project.owner}</TableCell>
                     <TableCell>{formatDate(project.created)}</TableCell>
@@ -129,9 +146,12 @@ export function ProjectsTable({ projects, users, acl }: ProjectsTableProps) {
                   <p>
                     <strong>Description:</strong> {selectedProject.description}
                   </p>
-                  <p>
-                    <strong>Status:</strong> {selectedProject.status}
-                  </p>
+<p>
+  <strong>Status:</strong>{" "}
+  <Badge className={getStatusBadgeClass(selectedProject.status ?? "unknown")}>
+    {selectedProject.status ?? "Sin estado"}
+  </Badge>
+</p>
                   <p>
                     <strong>Owner:</strong> {selectedProject.owner}
                   </p>
